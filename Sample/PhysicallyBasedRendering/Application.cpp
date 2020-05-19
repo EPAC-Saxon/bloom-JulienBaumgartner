@@ -171,7 +171,22 @@ std::shared_ptr<sgl::Texture> Application::AddBloom(
 std::shared_ptr<sgl::Texture> Application::CreateBrightness(
 	const std::shared_ptr<sgl::Texture>& texture) const
 {
-#pragma message ("You have to complete this code!")
+	sgl::Frame frame;
+	sgl::Render render;
+	frame.BindAttach(render);
+	render.BindStorage(texture->GetSize());
+	texture->Bind();
+
+	sgl::TextureManager texture_manager;
+	texture_manager.AddTexture("Display", texture);
+	auto program = sgl::CreateProgram("Brightness");
+	auto quad = sgl::CreateQuadMesh(program);
+	quad->SetTextures({ "Display" });
+
+	auto device = window_->GetUniqueDevice();
+	quad->Draw(texture_manager, device->GetProjection(), device->GetView(), device->GetModel());
+
+
 	return texture;
 }
 
