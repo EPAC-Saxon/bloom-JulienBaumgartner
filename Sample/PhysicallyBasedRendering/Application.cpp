@@ -260,8 +260,31 @@ std::shared_ptr<sgl::Texture> Application::MergeDisplayAndGaussianBlur(
 	const std::shared_ptr<sgl::Texture>& gaussian_blur,
 	const float exposure /*= 1.0f*/) const
 {
-#pragma message ("You have to complete this code!")
-	return gaussian_blur;
+	auto merge = std::make_shared<sgl::Texture>(display->GetSize(), sgl::PixelElementSize::FLOAT);
+	sgl::Frame frame;
+	sgl::Render render;
+	frame.BindAttach(render);
+	render.BindStorage(display->GetSize());
+	frame.BindTexture(*merge);
+
+	sgl::TextureManager texture_manager;
+	texture_manager.AddTexture("Display", display);
+	texture_manager.AddTexture("GaussianBlur", gaussian_blur);
+	auto program = sgl::CreateProgram("Combine");
+	auto quad = sgl::CreateQuadMesh(program);
+	quad->SetTextures({ "Display", "GaussianBlur" });
+	program->UniformFloat("exposure", exposure);
+	// Set the view port for rendering.
+	glViewport(0, 0, display->GetSize().first, display->GetSize().second);
+
+	// Clear the screen.
+	glClearColor(.2f, 0.f, .2f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	quad->Draw(texture_manager);
+
+
+	return merge;
 }
 
 std::shared_ptr<sgl::Mesh> Application::CreatePhysicallyBasedRenderedMesh(
