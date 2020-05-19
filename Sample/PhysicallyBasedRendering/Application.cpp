@@ -173,8 +173,8 @@ std::shared_ptr<sgl::Texture> Application::CreateBrightness(
 {
 	sgl::Frame frame;
 	sgl::Render render;
-	frame.BindAttach(render);
-	render.BindStorage(texture->GetSize());
+	//frame.BindAttach(render);
+	//render.BindStorage(texture->GetSize());
 	texture->Bind();
 
 	sgl::TextureManager texture_manager;
@@ -183,8 +183,9 @@ std::shared_ptr<sgl::Texture> Application::CreateBrightness(
 	auto quad = sgl::CreateQuadMesh(program);
 	quad->SetTextures({ "Display" });
 
-	auto device = window_->GetUniqueDevice();
-	quad->Draw(texture_manager, device->GetProjection(), device->GetView(), device->GetModel());
+	//auto device = window_->GetUniqueDevice();
+	//quad->Draw(texture_manager, device->GetProjection(), device->GetView(), device->GetModel());
+	quad->Draw(texture_manager);
 
 
 	return texture;
