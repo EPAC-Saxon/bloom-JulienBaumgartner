@@ -4,7 +4,7 @@ in vec2 vert_texcoord;
 
 out vec4 frag_color;
 
-uniform sampler2D display;
+uniform sampler2D Display;
 
 void main()
 {
