@@ -58,7 +58,7 @@ namespace sgl {
 
 	std::shared_ptr<Texture> Device::DrawTexture(const double dt)
 	{
-		auto texture = std::make_shared<Texture>(size_);
+		auto texture = std::make_shared<Texture>(size_, PixelElementSize::FLOAT);
 		Frame frame;
 		Render render;
 		frame.BindAttach(render);

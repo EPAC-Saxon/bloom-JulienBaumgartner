@@ -171,7 +171,7 @@ std::shared_ptr<sgl::Texture> Application::AddBloom(
 std::shared_ptr<sgl::Texture> Application::CreateBrightness(
 	const std::shared_ptr<sgl::Texture>& texture) const
 {
-	auto brightness = std::make_shared<sgl::Texture>(texture->GetSize());
+	auto brightness = std::make_shared<sgl::Texture>(texture->GetSize(), sgl::PixelElementSize::FLOAT);
 	sgl::Frame frame;
 	sgl::Render render;
 	frame.BindAttach(render);
@@ -191,9 +191,7 @@ std::shared_ptr<sgl::Texture> Application::CreateBrightness(
 	glClearColor(.2f, 0.f, .2f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	auto device = window_->GetUniqueDevice();
-	quad->Draw(texture_manager, device->GetProjection(), device->GetView(), device->GetModel());
-	//quad->Draw(texture_manager);
+	quad->Draw(texture_manager);
 
 
 	return brightness;
@@ -202,8 +200,59 @@ std::shared_ptr<sgl::Texture> Application::CreateBrightness(
 std::shared_ptr<sgl::Texture> Application::CreateGaussianBlur(
 	const std::shared_ptr<sgl::Texture>& texture) const
 {
-#pragma message ("You have to complete this code!")
-	return texture;
+	std::shared_ptr<sgl::Texture> textures[2];
+	textures[0] = texture;
+	textures[1] = std::make_shared<sgl::Texture>(texture->GetSize(), sgl::PixelElementSize::FLOAT);
+	sgl::Frame frames[2];
+	sgl::Render render;
+	frames[0].BindAttach(render);
+	frames[1].BindAttach(render);
+	render.BindStorage(texture->GetSize());
+	frames[0].BindTexture(*textures[0]);
+	frames[1].BindTexture(*textures[1]);
+
+	auto program = sgl::CreateProgram("GaussianBlur");
+	auto quad = sgl::CreateQuadMesh(program);
+
+	
+	bool horizontal = true;
+	bool beginning = true;
+
+
+	// Set the view port for rendering.
+	glViewport(0, 0, texture->GetSize().first, texture->GetSize().second);
+
+
+	for (int i = 0; i < 10; ++i)
+	{
+
+		// Clear the screen.
+		glClearColor(.2f, 1.f, .2f, 1.0f);
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		program->UniformInt("horizontal", horizontal);
+		sgl::TextureManager texture_manager;
+		if (beginning)
+		{
+			texture_manager.AddTexture("Image", textures[0]);
+		}
+		else 
+		{
+			texture_manager.AddTexture("Image", textures[1]);
+		}
+		quad->SetTextures({ "Image" });
+		quad->Draw(texture_manager);
+
+		if (horizontal)
+		{
+			beginning = !beginning;
+		}
+		horizontal = !horizontal;
+	}
+
+
+
+	return textures[1];
 }
 
 std::shared_ptr<sgl::Texture> Application::MergeDisplayAndGaussianBlur(
