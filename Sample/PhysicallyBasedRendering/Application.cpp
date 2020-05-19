@@ -171,11 +171,12 @@ std::shared_ptr<sgl::Texture> Application::AddBloom(
 std::shared_ptr<sgl::Texture> Application::CreateBrightness(
 	const std::shared_ptr<sgl::Texture>& texture) const
 {
+	auto brightness = std::make_shared<sgl::Texture>(texture->GetSize());
 	sgl::Frame frame;
 	sgl::Render render;
-	//frame.BindAttach(render);
-	//render.BindStorage(texture->GetSize());
-	texture->Bind();
+	frame.BindAttach(render);
+	render.BindStorage(texture->GetSize());
+	frame.BindTexture(*brightness);
 
 	sgl::TextureManager texture_manager;
 	texture_manager.AddTexture("Display", texture);
@@ -183,12 +184,19 @@ std::shared_ptr<sgl::Texture> Application::CreateBrightness(
 	auto quad = sgl::CreateQuadMesh(program);
 	quad->SetTextures({ "Display" });
 
-	//auto device = window_->GetUniqueDevice();
-	//quad->Draw(texture_manager, device->GetProjection(), device->GetView(), device->GetModel());
-	quad->Draw(texture_manager);
+	// Set the view port for rendering.
+	glViewport(0, 0, texture->GetSize().first, texture->GetSize().second);
+
+	// Clear the screen.
+	glClearColor(.2f, 0.f, .2f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	auto device = window_->GetUniqueDevice();
+	quad->Draw(texture_manager, device->GetProjection(), device->GetView(), device->GetModel());
+	//quad->Draw(texture_manager);
 
 
-	return texture;
+	return brightness;
 }
 
 std::shared_ptr<sgl::Texture> Application::CreateGaussianBlur(
