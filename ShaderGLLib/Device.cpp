@@ -46,13 +46,25 @@ namespace sgl {
 
 	void Device::Display(const std::shared_ptr<Texture>& texture)
 	{
-#pragma message ("You have to complete this code!")
+		auto program = CreateProgram("Display");
+		auto quad = CreateQuadMesh(program);
+		texture_manager_ = TextureManager();
+		texture_manager_.AddTexture("Display", texture);
+		quad->SetTextures({ "Display" });
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		error_.Display(__FILE__, __LINE__ - 1);
+		quad->Draw(texture_manager_, perspective_, view_, model_);
 	}
 
 	std::shared_ptr<Texture> Device::DrawTexture(const double dt)
 	{
-#pragma message ("You have to complete this code!")
-		return nullptr;
+		auto texture = std::make_shared<Texture>(size_);
+		Frame frame;
+		Render render;
+		frame.BindAttach(render);
+		render.BindStorage(size_);
+		texture->Bind();
+		return texture;
 	}
 
 	void Device::SetupCamera()
